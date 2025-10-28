@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نموذج جاهز - مساحة عملك للمستندات</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%230d6efd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15.5 2H8.6c-.4 0-.8.2-1.1.5-.3.3-.5.7-.5 1.1V21c0 .6.4 1 1 1h12c.6 0 1-.4 1-1V8.5L15.5 2z'%3E%3C/path%3E%3Cpath d='M15 2v6.5h6.5'%3E%3C/path%3E%3C/svg%3E">
+    
+    <!-- External Libraries from CDN for simplicity and performance. No local dependencies needed. -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --primary-hover-color: #0b5ed7;
+            --secondary-color: #6c757d;
+            --secondary-hover-color: #5c636a;
+            --background-color: #f8f9fa;
+            --surface-color: #ffffff;
+            --text-color: #212529;
+            --muted-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --border-radius: 0.5rem;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --font-family: 'Tajawal', sans-serif;
+
+            /* Bootstrap variable mapping for consistency */
+            --bs-body-color: var(--text-color);
+            --bs-body-bg: var(--background-color);
+            --bs-secondary-color: var(--muted-text-color);
+            --bs-border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #0d6efd;
+            --primary-hover-color: #3385fd;
+            --secondary-color: #6c757d;
+            --secondary-hover-color: #7a8288;
+            --background-color: #121212;
+            --surface-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --muted-text-color: #adb5bd;
+            --border-color: #333333;
+            
+            /* Bootstrap variable mapping for dark mode */
+            --bs-body-color: var(--text-color);
+            --bs-body-bg: var(--background-color);
+            --bs-secondary-color: var(--muted-text-color);
+            --bs-border-color: var(--border-color);
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+
+        html, body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease;
+        }
+
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background-color: rgba(var(--surface-rgb, 255, 255, 255), 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .brand-text { color: var(--text-color); }
+        .header-icon { margin-inline-end: 0.5rem; color: var(--primary-color); }
+
+        .theme-toggle, .my-documents-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            color: var(--muted-text-color);
+            padding: 0.4rem 0.6rem;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover, .my-documents-btn:hover {
+            background-color: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        section { display: none; }
+        section.active { display: block; }
+        
+        .template-card, .saved-document-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+        .template-card:hover, .saved-document-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+        .template-card .card-icon, .saved-document-card .card-icon {
+            width: 28px; height: 28px; color: var(--primary-color);
+            margin-inline-end: 1rem; flex-shrink: 0;
+        }
+        .template-card h5, .saved-document-card h5 { color: var(--text-color); font-weight: 700; }
+        .template-card p, .saved-document-card p { color: var(--muted-text-color); font-size: 0.9rem; }
+        
+        .content-section {
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .form-column, .viewer-column { height: calc(100vh - 180px); }
+        .scrollable { overflow-y: auto; height: 100%; }
+
+        .form-control, .form-control:focus {
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+        .form-control::placeholder { color: var(--muted-text-color); }
+        .form-control:focus { 
+            border-color: var(--primary-color); box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+        
+        .btn { border-radius: var(--border-radius); font-weight: 500; transition: all 0.2s ease-in-out; }
+        .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); }
+        .btn-primary:hover { background-color: var(--primary-hover-color); border-color: var(--primary-hover-color); transform: translateY(-2px); }
+        .btn:disabled { cursor: not-allowed; opacity: 0.65; transform: none; }
+
+        .document-content {
+            white-space: pre-wrap; word-wrap: break-word; background-color: var(--background-color);
+            border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem;
+            font-size: 1rem; line-height: 1.9; color: var(--text-color);
+        }
+
+        #back-button svg { transform: scaleX(-1); }
+        
+        /* Mobile Specific Styles */
+        @media (max-width: 991.98px) {
+            .form-column, .viewer-column { height: auto; }
+            .content-section { margin-bottom: 1.5rem; }
+            #editor-tabs .tab-content { padding-top: 1.5rem; }
+            #editor-tabs .nav-link { color: var(--muted-text-color); }
+            #editor-tabs .nav-link.active { color: var(--primary-color); font-weight: bold; border-color: var(--primary-color); }
+
+            #app-section .container { padding-bottom: 100px; /* Space for sticky actions */ }
+            
+            .actions-wrapper {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background-color: var(--surface-color);
+                padding: 0.75rem 1rem;
+                border-top: 1px solid var(--border-color);
+                box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+                z-index: 1020;
+                transition: background-color 0.3s ease, border-color 0.3s ease;
+            }
+            [data-theme="dark"] .actions-wrapper {
+                box-shadow: 0 -4px 12px rgba(255,255,255,0.05);
+            }
+            #action-buttons {
+                justify-content: space-around;
+            }
+        }
+
+        /* Desktop Specific Styles: Force tab panes to be visible side-by-side */
+        @media (min-width: 991.99px) {
+            #app-section .tab-pane {
+                display: block;
+                opacity: 1; /* Override fade out */
+                visibility: visible;
+            }
+        }
+
+    </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+    <div class="container-fluid main-container">
+        <header class="header d-flex justify-content-between align-items-center py-3 sticky-top mb-4 px-3 px-md-4">
+            <div id="brand-logo" class="d-flex align-items-center" style="cursor: pointer;">
+                <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 2H8.6c-.4 0-.8.2-1.1.5-.3.3-.5.7-.5 1.1V21c0 .6.4 1 1 1h12c.6 0 1-.4 1-1V8.5L15.5 2z"></path><path d="M15 2v6.5h6.5"></path></svg>
+                <h1 class="h4 m-0 fw-bold brand-text">نموذج جاهز</h1>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button id="my-documents-btn" class="my-documents-btn d-flex align-items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5 0h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm0 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H5z"/><path d="M8 8.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm0-5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/></svg>
+                    <span>مستنداتي</span>
+                </button>
+                <button id="theme-toggle" class="theme-toggle d-flex align-items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" id="theme-icon-light"><path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm-5-6.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm10 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zM3.54 4.46a.5.5 0 0 1 0 .708L2.83 5.879a.5.5 0 1 1-.707-.707l.707-.707a.5.5 0 0 1 .707 0zm9.193 9.193a.5.5 0 0 1 0 .708L12.025 15.07a.5.5 0 0 1-.707-.707l.707-.707a.5.5 0 0 1 .707 0zm-9.193 0a.5.5 0 0 1 .708 0l.707.707a.5.5 0 0 1-.707.707L2.83 12.72a.5.5 0 0 1 0-.707zM12.025 2.83a.5.5 0 0 1 .707 0l.707.707a.5.5 0 0 1-.707.707L12.025 3.53a.5.5 0 0 1 0-.707z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" id="theme-icon-dark" class="d-none"><path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278zM4.858 1.311A7.269 7.269 0 0 0 1.025 7.71c0 4.021 3.278 7.277 7.318 7.277a7.316 7.316 0 0 0 5.205-2.162c-.337.042-.68.063-1.029.063-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-grow-1">
+            <!-- Landing Section -->
+            <section id="landing-section" class="active">
+                <!-- Hero Section -->
+                <div class="container col-xxl-8 px-4 py-5">
+                    <div class="row align-items-center g-5 py-lg-5">
+                        <div class="col-lg-6 text-center text-lg-start">
+                            <h2 class="display-4 fw-bolder lh-1 mb-4">مساحة عملك للمستندات</h2>
+                            <p class="lead text-muted mb-4" style="max-width: 500px;">أنشئ، عدّل، واحفظ مستنداتك القانونية الهامة بدقة واحترافية. كل شيء في مكان واحد.</p>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="hero-image-wrapper text-center">
+                                <svg class="img-fluid" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="رسم توضيحي لشخص ينظم المستندات">
+                                    <defs>
+                                        <clipPath id="blobClip">
+                                            <path fill="var(--primary-color)" d="M48.2,-64.9C62.1,-55.6,72.7,-42.1,77.9,-26.6C83.2,-11.1,83.1,6.4,76.6,20.8C70.1,35.2,57.1,46.5,43.2,55.9C29.3,65.3,14.6,72.8,-1,73.8C-16.7,74.9,-33.3,69.5,-47.7,60C-62,50.5,-74.1,36.9,-79,21.1C-84,5.3,-81.8,-12.6,-73.4,-26.7C-65,-40.7,-50.4,-50.8,-36.3,-60.5C-22.1,-70.2,-8.5,-79.5,6.3,-82.7C21,-85.9,42.1,-83.1,48.2,-64.9Z" transform="translate(100 100)" />
+                                        </clipPath>
+                                    </defs>
+                                    
+                                    <g clip-path="url(#blobClip)">
+                                        <!-- Background Gradient -->
+                                        <rect width="200" height="200" fill="var(--background-color)" />
+                                        <rect width="200" height="200" fill="var(--primary-color)" opacity="0.1" />
+                                    </g>
+                                    
+                                    <!-- Floating Documents -->
+                                    <g transform="translate(15, 20) rotate(-10 50 50)" style="transition: transform 0.3s ease;">
+                                        <rect x="20" y="20" width="70" height="90" rx="5" fill="var(--surface-color)" stroke="var(--border-color)" stroke-width="1.5" />
+                                        <rect x="30" y="30" width="30" height="4" rx="2" fill="var(--primary-color)" />
+                                        <rect x="30" y="40" width="50" height="3" rx="1.5" fill="var(--muted-text-color)" />
+                                        <rect x="30" y="50" width="50" height="3" rx="1.5" fill="var(--muted-text-color)" />
+                                        <rect x="30" y="60" width="40" height="3" rx="1.5" fill="var(--muted-text-color)" />
+                                    </g>
+                                     <g transform="translate(110, 80) rotate(15 50 50)" style="transition: transform 0.3s ease;">
+                                        <rect x="20" y="20" width="70" height="90" rx="5" fill="var(--surface-color)" stroke="var(--border-color)" stroke-width="1.5" />
+                                        <rect x="30" y="30" width="30" height="4" rx="2" fill="var(--primary-color)" />
+                                        <rect x="30" y="40" width="50" height="3" rx="1.5" fill="var(--muted-text-color)" />
+                                        <rect x="30" y="50" width="50" height="3" rx="1.5" fill="var(--muted-text-color)" />
+                                    </g>
+
+                                    <!-- Character -->
+                                    <g transform="translate(60, 55)">
+                                        <!-- Head -->
+                                        <circle cx="40" cy="25" r="12" fill="var(--primary-color)" opacity="0.2"/>
+                                        <circle cx="40" cy="25" r="10" fill="var(--text-color)" />
+                                        <!-- Body -->
+                                        <path d="M40,35 C 25 35, 20 70, 20 80 L 60 80 C 60 70, 55 35, 40 35 Z" fill="var(--primary-color)"/>
+                                        <path d="M40,35 C 25 35, 25 60, 25 70 L 55 70 C 55 60, 55 35, 40 35 Z" fill="var(--primary-hover-color)"/>
+                                    </g>
+                                    
+                                     <!-- Desk/Surface -->
+                                     <rect x="10" y="135" width="180" height="50" rx="10" fill="var(--surface-color)" stroke="var(--border-color)" stroke-width="1"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Templates Section -->
+                <div class="container my-5" id="templates-section">
+                    <h3 class="fw-bold mb-4 text-center">اختر نموذجًا جديدًا</h3>
+                    <div class="row justify-content-center mb-4">
+                        <div class="col-md-8 col-lg-6">
+                            <input type="search" id="search-input" class="form-control form-control-lg" placeholder="ابحث عن نموذج (مثال: إيجار، بيع، زواج)...">
+                        </div>
+                    </div>
+                    <div id="templates-container" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"></div>
+                    <div id="no-results-message" class="text-center text-muted d-none mt-4"><p class="lead">لا توجد نتائج تطابق بحثك.</p></div>
+                </div>
+            </section>
+            
+            <!-- My Documents Section -->
+            <section id="my-documents-section" class="py-5">
+                <div class="container">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="fw-bold m-0">مستنداتي المحفوظة</h2>
+                        <button id="back-to-home-btn" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/></svg>
+                            العودة للرئيسية
+                        </button>
+                    </div>
+                    <div id="saved-documents-container" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"></div>
+                     <div id="no-saved-documents-message" class="text-center text-muted d-none mt-5">
+                        <svg class="mb-3" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted-text-color);"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                        <p class="lead">ليس لديك أي مستندات محفوظة بعد.</p>
+                        <p>ابدأ بإنشاء مستند جديد من الصفحة الرئيسية.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- App Section (Editor) -->
+            <section id="app-section">
+                <div class="container py-4">
+                     <!-- Mobile Tabs Navigation -->
+                    <div class="d-lg-none mb-3">
+                         <ul class="nav nav-tabs nav-fill" id="editor-tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="form-tab" data-bs-toggle="tab" data-bs-target="#form-pane" type="button" role="tab" aria-controls="form-pane" aria-selected="true">تعبئة البيانات</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="viewer-tab" data-bs-toggle="tab" data-bs-target="#viewer-pane" type="button" role="tab" aria-controls="viewer-pane" aria-selected="false">معاينة المستند</button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="tab-content" id="editor-tab-content">
+                        <div class="row g-4 justify-content-center">
+                            <!-- Form Column / Tab Pane -->
+                             <div class="col-lg-5 d-flex flex-column form-column tab-pane fade show active" id="form-pane" role="tabpanel" aria-labelledby="form-tab">
+                                <div class="content-section scrollable">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h3 id="template-title" class="fw-bold brand-text m-0"></h3>
+                                        <button id="back-button" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/></svg>
+                                            العودة
+                                        </button>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="document-name-input" class="form-label fw-bold">اسم المستند (سيظهر في قائمة "مستنداتي")</label>
+                                        <input type="text" id="document-name-input" class="form-control form-control-lg" placeholder="مثال: عقد إيجار شقة المهندسين">
+                                    </div>
+                                    <hr class="mb-4">
+                                    <form id="dynamic-form"></form>
+                                </div>
+                            </div>
+                            <!-- Viewer Column / Tab Pane -->
+                             <div class="col-lg-7 d-flex flex-column viewer-column tab-pane fade" id="viewer-pane" role="tabpanel" aria-labelledby="viewer-tab">
+                                <div class="content-section d-flex flex-column h-100">
+                                    <pre id="document-viewer" class="document-content flex-grow-1 scrollable">
+                                        <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                            <p>سيظهر المستند هنا بعد ملء البيانات.</p>
+                                        </div>
+                                    </pre>
+                                    <div class="d-none d-lg-flex flex-wrap gap-2 mt-3 actions-wrapper">
+                                         <div id="action-buttons-desktop" class="d-flex flex-wrap gap-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <!-- Mobile Sticky Actions -->
+                <div class="d-lg-none actions-wrapper">
+                    <div id="action-buttons-mobile" class="d-flex flex-wrap gap-2"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer mt-auto py-3 text-center">
+            <p class="mb-0 text-muted small">© <span id="copyright-year">2024</span> نموذج جاهز. جميع الحقوق محفوظة.</p>
+        </footer>
+    </div>
+
+    <div id="action-buttons-template" class="d-none">
+        <button id="save-button" class="btn btn-success d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M.5 2.5A2.5 2.5 0 0 1 3 0h10a2.5 2.5 0 0 1 2.5 2.5v3.5a.5.5 0 0 1-1 0v-3.5A1.5 1.5 0 0 0 13 1H3a1.5 1.5 0 0 0-1.5 1.5v3.5a.5.5 0 0 1-1 0v-3.5zM8 15a1 1 0 0 0 1-1V5a1 1 0 0 0-2 0v9a1 1 0 0 0 1 1z"/></svg>
+            حفظ
+        </button>
+        <button id="copy-button" class="btn btn-secondary d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13 0H6a2 2 0 0 0-2 2 2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM5 4a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4z"/><path d="M2 2a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V2z"/></svg>
+            نسخ
+        </button>
+        <button id="download-button" class="btn btn-primary d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+            تحميل PDF
+        </button>
+        <button id="download-blank-button" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.406 1.342A5.53 5.53 0 0 1 8 0c2.69 0 4.923 2 5.166 4.579C14.758 4.804 16 6.137 16 7.773 16 9.569 14.502 11 12.687 11H10a.5.5 0 0 1 0-1h2.688C13.979 10 15 8.988 15 7.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 2.825 10.328 1 8 1a4.53 4.53 0 0 0-4.242 3.5h-.5C1.02 4.5 0 5.512 0 6.773 0 8.016.92 9 2.125 9H5a.5.5 0 0 1 0 1H2.125C.95 10 0 8.988 0 7.773c0-1.284.909-2.355 2.14-2.604A5.53 5.53 0 0 1 4.406 1.342z"/><path d="M7.646 15.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 14.293V5.5a.5.5 0 0 0-1 0v8.793l-2.146-2.147a.5.5 0 0 0-.708.708l3 3z"/></svg>
+            تحميل فارغ
+        </button>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="index.js"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
